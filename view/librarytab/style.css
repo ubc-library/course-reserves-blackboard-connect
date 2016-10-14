@@ -1,0 +1,56 @@
+.portlet{
+  padding-left:10px;
+  padding-right:10px;
+}
+.hidden{
+	display:none;
+}
+#tab .disabled{
+	background-color:#c5c5c5;
+}
+.clearprevioussearch{
+	cursor:pointer;
+	color:red;
+}
+input[type=search]{
+  width:80%;
+  
+}
+table.coursetable{
+  width:100%;
+}
+
+table.coursetable th{
+	background-color:#ddd;
+	border:1px solid #aaa;
+}
+table.coursetable th:first-child{
+  width:80%;
+}
+
+table.coursetable td{
+  border:1px solid #aaa;
+}
+
+table.coursetable td:last-child{
+  text-align:center;
+}
+
+.nonstudent{
+  font-weight: bolder;
+}
+
+#tabcontent{
+	max-height:500px;
+	border:1px solid #ccc;
+	margin:10px 10px 0px 10px;
+	padding:10px;
+	overflow:auto;
+}
+
+.inline{
+	display:inline !important;
+}
+.btn.inline{
+	vertical-align:top;
+}

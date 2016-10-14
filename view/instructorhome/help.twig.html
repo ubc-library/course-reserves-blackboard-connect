@@ -1,0 +1,37 @@
+<div class="row-fluid expand">
+    <div class="span12">
+        <h4>Help with Library Course Reserves</h4>
+        <ul>
+            <li>Contact your local Library Reserve Staff at <strong>{{ branch.name }} Library</strong>: <a href="mailto:{{ branch.email }}">{{ branch.email }}</a></li>
+            <li><a href="http://copyright.ubc.ca/" target="_blank">Copyright Information</a></li>
+        </ul>
+    </div>
+</div>
+
+
+
+<div class="row-fluid expand">
+    <div class="span12">
+        <h4>How to Use Course Reserves in Connect</h4>
+        <strong>Get more help at <a href="http://courses.library.ubc.ca" target="_blank">courses.library.ubc.ca</a></strong>
+    </div>
+</div>
+
+<br>
+
+<ul id="helptabs" class="nav nav-tabs noprint" data-tabs="helptabs">
+    <li class="active">
+        <a href="#help-tutorials" data-toggle="tab">Text Instructions</a>
+    </li>
+    <li>
+        <a href="#help-videos" data-toggle="tab">Video Tutorials</a>
+    </li>
+</ul>
+<div id="help-tab-content" class="tab-content">
+    <div class="tab-pane active" id="help-tutorials">
+        {{ help|raw }}
+    </div>
+    <div class="tab-pane" id="help-videos">
+        {{ vids|raw }}
+    </div>
+</div>

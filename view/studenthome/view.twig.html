@@ -1,0 +1,253 @@
+{% if instructormode %}
+    <div class="alert alert-info noprint">
+        <i class="icon icon-caret-right"></i> <a href="{{ instructormode }}">Switch to Instructor Mode</a>
+    </div>
+{% endif %}
+
+<div id="content">
+    <div class="row-fluid expand">
+        <div class="span12">
+            <h1>{{ course_info.title }}</h1>
+        </div>
+    </div>
+    <!--
+    {% if enrolled %}
+        <div class="row-fluid expand noprint">
+            <div class="span12">
+                {% if subscription == 1 %}
+                    <p>
+                        You are currently <span id="subscription-status"
+                                                class="label label-success">SUBSCRIBED</span> to this course, and
+                        will <span id="subscription-not"></span> receive notifications when new readings are available.
+                        &nbsp;&nbsp;&nbsp;
+                        <button id="subscribe-toggle" class="btn btn-inverse"
+                                value="Unsubscribe">Unsubscribe</button>
+                    </p>
+                {% else %}
+                    <p>
+                        You are currently <span id="subscription-status"
+                                                class="label label-important">NOT SUBSCRIBED</span> to this course,
+                        and will <span id="subscription-not">not</span> receive notifications when new readings are available.
+                        &nbsp;&nbsp;&nbsp;
+                        <button id="subscribe-toggle" class="btn btn-warning"
+                                value="Subscribe">Subscribe</button>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="row-fluid expand noprint">
+            <div class="span12"><p>You must be enrolled in this course to subscribe to email notifications.</p></div>
+        </div>
+    {% endif %}
+-->
+    <div class="row-fluid expand">
+        <div class="span12">
+            {% if readings %}
+                <div class="row-fluid expand">
+                    <div class="span9">
+                        <h3 class="noprint" style="margin: 0;">Readings</h3>
+                        {% if course_tags %}
+                            <h2 class="noprint" style="margin: 0"><a href="#" id="sh-tag-cloud"><i
+                                            class="fa fa-tags"></i>&nbsp;View Tags</a></h2>
+                            <div class="noprint" id="tag-cloud" style="display:none">
+                                {% for tag_id,tag_data in course_tags %}
+                                    <a href="#" class="filter-table btn btn-tag"
+                                       style="vertical-align:middle;height:{{ tag_data.frequency+4 }}px;line-height:{{ tag_data.frequency+4 }}px;font-size:{{ tag_data.frequency }}px"
+                                       data-tag="{{ tag_data.hash }}">{{ tag_data.name }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="span3">
+                        <button type="button" class="btn btn-inverse noprint pull-right" onClick="printReadingList()">
+                            Print Reading List
+                        </button>
+                    </div>
+                </div>
+                <div class="clearfix noprint"></div>
+                <br>
+                <div id="filter-indicator-wrapper" style="display: none" class="noprint">
+                    <button type="button" class="btn btn-invis noprint" id="clear_filter_button">Clear Tag Filter:&nbsp;<span
+                                id="filter-indicator"></span>&nbsp;<!-- &#215; --></button>
+                </div>
+                <table id="student-readings" class="table table-data" width="100%">
+                    <thead>
+                    <tr>
+                        <!-- <th class="">Item ID</th> -->
+                        <th class="" id="required">Req'd</th>
+                        <th class="" id="title">Title</th>
+                        <th class="" id="format">Format</th>
+                        <th class="" id="author">Author</th>
+                        <th class="" id="call_no">Call Number</th>
+                        <th class="" id="pages">Pages</th>
+                        <th class="" id="available_until">Available Until</th>
+                        <th class="" id="tags">Tags</th>
+                        <th class="" id="read">Read</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for key,reading in readings %}
+                        <tr>
+                            <td class="student-reading-required">{{ (reading.required == 1) ? '<i class="fa fa-flag fa-2x"></i>'|raw : '' }}</td>
+                            <td class="student-reading-title">
+                                <a href="{{ key }}" class="show-details">{{ reading.title }}</a>
+                                {% if reading.bibdata.journal_title and reading.bibdata.journal_title != '' %}
+                                    <br>{{ reading.bibdata.journal_title }}
+                                    {% if reading.bibdata.journal_volume and reading.bibdata.journal_volume != '' %}
+                                        <br>Volume: {{ reading.bibdata.journal_volume }}
+                                    {% endif %}
+                                    {% if reading.bibdata.journal_issue and reading.bibdata.journal_issue != '' %}
+                                            &nbsp; Issue: {{ reading.bibdata.journal_issue }}
+                                    {% endif %}
+                                {% endif %}
+                                {% if reading.bibdata.collection_title and reading.bibdata.collection_title != '' %}
+                                    <br>{{ reading.bibdata.collection_title }}
+                                {% endif %}
+                                {% if reading.bibdata.item_edition and reading.bibdata.item_edition != '' %}
+                                    <br>&nbsp;{{ reading.bibdata.item_edition }}
+                                {% endif %}
+                            </td>
+                            <td class="student-reading-format" style="text-align: center" data-sort="{{ reading.format_icon }}"><i
+                                        class="fa fa-{{ reading.format_icon }} fa-2x"></i></td>
+                            <td class="student-reading-authors">{{ reading.author }}</td>
+                            <td class="student-reading-callnum">{{ (reading.callnum and reading.callnum|trim !='') ? reading.callnum : '' }}</td>
+                            <td class="student-reading-pages">{{ reading.bibdata.item_incpages }}</td>
+                            <td class="student-reading-active">{{ reading.inactive }}</td>
+                            <td class="student-reading-tags"
+                                data-taglist="{{ reading.taglist }}">{% for tag in reading.tags %}<a href="#"
+                                                                                                     class="filter-table btn btn-tag"
+                                                                                                     data-tag="{{ tag.hash }}">{{ tag.name }}</a>{% endfor %}
+                            </td>
+                            <td class="student-readings-read">{% if reading.times_read > 0 %}Yes{% else %}No{% endif %}</td>
+                            <!-- TODO add shorturl (on print version only) -->
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h3 class="noprint" style="margin: 0;">Readings</h3>
+                <p>No readings.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if readings %}
+    {% for key,reading in readings %}
+        {#<div id="reading-{{ key }}" class="reveal-modal student-modal xlarge noprint">#}
+        <div id="reading-{{ key }}" class="student-dialog" style="display:none">
+            <div id="reading-{{ key }}-content" class="student-dialog-content">
+                <div class="row-fluid expand">
+                    <h2 style="margin: 0; font-weight: 300; font-size: 18px;">Item Access</h2>
+                </div>
+                <div class="row-fluid expand">
+                    <div class="span8">
+                        <strong>Description</strong>
+                    </div>
+                    <div class="span4">
+                        <strong>URL</strong>
+                    </div>
+                </div>
+                <div class="row-fluid expand">
+                    <div class="span8">
+                        To access the course material, please use the following link:
+                    </div>
+                    <div class="span4">
+                        <a href="/get/course/{{ course_id }}/hash/i.{{ reading.hash }}" target="_blank"
+                           class="btn btn-success">View Item&nbsp;<i class="fa fa-external-link-square"></i></a>
+                    </div>
+                </div>
+                {% if reading.addurls %}
+                    <div class="row-fluid expand">
+                        <div class="span12">
+                            <strong>The following supplementary URLs have been provided for this Course
+                                Material:</strong>
+                        </div>
+                    </div>
+                    {% for addurl in reading.addurls %}
+                        <div class="row-fluid expand">
+                            <div class="span8">
+                                <p>{{ addurl.description }}</p>
+                            </div>
+                            <div class="span4">
+                                <a href="{{ addurl.url }}" class="btn btn-info" target="_blank">View
+                                    Supplemental&nbsp;<i class="fa fa-external-link-square"></i></a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <hr>
+                <div class="row-fluid expand">
+                    <div class="span12">
+                        <strong style="margin: 0; font-weight: 300; font-size: 16px;"><i class="fa fa-clock-o"></i> This
+                            material is available
+                            until: {{ reading.inactive }}</strong>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row-fluid expand">
+                    <div class="span12">
+                        <h2 style="margin: 0; font-weight: 300; font-size: 18px;">Instructor Note to Student</h2>
+                        {% if reading.note %}
+                            {% for key,value in reading.note %}
+                                <p>{{ value.content }}</p>
+                                <hr>
+                            {% endfor %}
+                        {% else %}
+                            <p>No notes listed</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row-fluid expand">
+                    <div class="span12">
+                        <h2 style="margin: 0; font-weight: 300; font-size: 18px;">Tags</h2>
+                        {% if reading.tags %}
+                            <p>
+                                {% for tag in reading.tags %}
+                                    <span class="span-tag">{{ tag.name }}</span>
+                                {% endfor %}
+                            </p>
+                        {% else %}
+                            <p><strong>Your lecturer has not set any tags for this reading.</strong></p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <hr>
+                <div class="row-fluid expand">
+                    <div class="span12">
+                        <h2 style="margin: 0; font-weight: 300; font-size: 18px;">Bibliographic Information</h2>
+                        {% for rkey,value in reading.bibdata %}
+                            {% if value != "" and rkey not in ['uri'] %}
+                                <strong>{{ attribute(reading.fieldtitles,rkey) }}
+                                : </strong>{% if attribute(field_mapping,rkey)=='uri' %}{{ uri }}{% else %}{{ value }}{% endif %}
+                                <br>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            {#<a class="close-reveal-modal">&#215;</a>#}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- <script type="text/javascript" src="{{ env_url }}/js/vendor/datatables/datatables.min.js"></script>
+<link rel="stylesheet" href="{{ env_url }}/js/vendor/datatables/datatables.min.css"> -->
+
+<script>
+    var showtag = '{{ showtag }}';
+    var course_id = {{ course_id }};
+    var printBool = {{ print }};
+
+    var puid = '{{ user_info.puid }}';
+    var course = '{{  course_info.course_id  }}';
+
+</script>

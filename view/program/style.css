@@ -1,0 +1,10 @@
+.historical{
+opacity:0.5;
+}
+
+.program-item-url {
+    text-align: right;
+    background-color: #F5F5F5;
+    padding: 4px 10px 0 0;
+    height: 30px;
+}

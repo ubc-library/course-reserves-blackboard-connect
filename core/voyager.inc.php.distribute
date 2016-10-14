@@ -1,0 +1,166 @@
+<?php
+    /**
+     *  Performs a Voyager catalog search.
+     *  only FindInVoyagerByWebcat is being used (for the Webcat URL and Voyager Reserves functions).
+     */
+    define('VXWS', 'REPLACE_WITH_VOYAGER_URL');
+
+    /**
+     * @param $value
+     * @param bool $returnRaw
+     * @return array
+     */
+    function findInVoyagerByTitle($value, $returnRaw = FALSE)
+    {
+        return findInVoyager('TALL', $value, $returnRaw);
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    function findInVoyagerByIsbn($value)
+    {
+        return findInVoyager('ISBN', $value);
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    function findInVoyagerByCallno($value)
+    {
+        return findInVoyager('CALL', $value);
+    }
+
+    /**
+     * @param $value
+     * @param bool $returnRaw
+     * @return array|mixed|string
+     */
+    function findInVoyagerByWebcat($value, $returnRaw = FALSE)
+    {
+        preg_match('/(?:bi)?(?:b)?(?:id=)?([0-9]+)$/i', $value, $b);
+        $bibid = array_pop($b);
+
+        if (!is_numeric($bibid)) {
+            return array();
+        }
+
+        $url = VXWS . 'GetHoldingsService?bibId=' . $bibid;
+        error_log('GetHoldingsService  ' . $url);
+        $text = file_get_contents($url);
+
+        if ($returnRaw) {
+            return $text;
+        }//should never be called anymore, was previously called from getitem.php
+
+        $xml = simplexml_load_string($text);
+        if ($xml === FALSE) {
+            return array(
+                'error'  => 'Could not parse XML',
+                'errors' => libxml_get_errors(),
+                'xml'    => $text
+            );
+        }
+
+        # Fetch all namespaces
+        $namespaces = $xml->getNamespaces(TRUE);
+
+        # Register them with their prefixes
+        foreach ($namespaces as $prefix => $ns) {
+            $xml->registerXPathNamespace($prefix, $ns);
+        }
+
+        if (isset($namespaces['hol'])) {
+            $has = $xml->xpath("//hol:bibRecord[@bibId='$bibid']");
+            if ($has) {
+                $text = preg_replace('@<(/?)[a-zA-Z]*:([a-zA-Z0-9]*)@', '<$1$2', $text);
+                $xml = simplexml_load_string($text);
+                $data = json_decode(json_encode($xml), TRUE);
+
+                $marcData = $data['serviceData']['holdingsRecord']['bibRecord']['marcRecord']['datafield'];
+
+                $searchFields = array();
+                $sft = array();
+                foreach ($marcData as $d) {
+                    if ($d['@attributes']['tag'] == '020') {
+                        if (!is_array($d['subfield'])) {
+                            $d['subfield'] = array($d['subfield']);
+                        }
+                        foreach ($d['subfield'] as $ds) {
+                            $i = preg_replace('/[^0-9]/', '', $ds);
+                            if (strlen($i) == 10 || strlen($i) == 13) { //some have the price in here
+                                $searchFields[] = array('ISBN', $i);
+                            }
+                        }
+                    }
+                    if ($d['@attributes']['tag'] == '245') { // Title tag
+                        $field = is_array($d['subfield']) ? implode(': ', $d['subfield']) : $d['subfield'];
+                        $sft[] = array('Title', $field);
+                        $sft[] = array('ExternalDocumentID', $bibid);
+                    }
+                }
+
+                if (!$searchFields) { //fallback to title search if no ISBN
+                    $searchFields = $sft;
+                }
+                $searchFields = array_values($searchFields);
+
+                $data = array();
+                if (!$searchFields) {
+                    error_log("Couldn't find title!".__FILE__.' @ '.__LINE__);
+                } else {
+                    return findInSummon($searchFields, array(), TRUE);
+                }
+                header('Content-type:application/json');
+                return json_encode($data);
+            } else {
+                return array('error' => 'Unexpected error.');
+            }
+        } else {
+            return array(
+                'error' => "Bib ID not found."
+            );
+        }
+    }
+
+    /**
+     * @param $searchCode
+     * @param $searchArg
+     * @param bool $returnRaw
+     * @return array|string
+     */
+    function findInVoyager($searchCode, $searchArg, $returnRaw = FALSE)
+    {
+        $url = VXWS . 'SearchService?searchArg=' . $searchArg . '&searchCode=' . $searchCode;
+        $text = file_get_contents($url);
+        if ($returnRaw) {
+            return $text;
+        }
+        $xml = simplexml_load_string($text);
+        if ($xml === FALSE) {
+            return array(
+                'error'  => 'Could not parse XML',
+                'errors' => libxml_get_errors(),
+                'xml'    => $text
+            );
+        }
+        # Fetch all namespaces
+        $namespaces = $xml->getNamespaces(TRUE);
+        # Register them with their prefixes
+        foreach ($namespaces as $prefix => $ns) {
+            $xml->registerXPathNamespace($prefix, $ns);
+        }
+        $ret = array();
+        foreach ($xml->xpath("//sear:result") as $result) {
+            $r = array('source' => 'Voyager');
+            $kids = $result->children('http://www.endinfosys.com/Voyager/search');
+            foreach (array('bibId' => 'id', 'bibText1' => 'title', 'callNumber' => 'callno', 'bibText2' => 'author') as $v => $a) {
+                $el = $kids->$v;
+                $r[$a] = (string)$el;
+            }
+            $ret[] = $r;
+        }
+        return $ret;
+    }

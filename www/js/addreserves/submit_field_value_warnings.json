@@ -1,0 +1,14 @@
+[
+    {
+        "field": "item_uri",
+        "value": "http://webcat.library.ubc.ca/vwebv/holdingsInfo?bibId=1197975",
+        "flag": "hbr",
+        "notice": "<p><strong>The License Agreement for the Harvard Business Review prohibits linking from course materials. We have provided a link to UBC Library's HBR holdings, where a print copy is accessible.</strong></p>"
+    },
+    {
+        "field": "initial_uri",
+        "value": "http://webcat.library.ubc.ca/vwebv/holdingsInfo?bibId=1197975",
+        "flag": "hbr",
+        "notice": "<p><strong>The License Agreement for the Harvard Business Review prohibits linking from course materials. We have provided a link to UBC Library's HBR holdings, where a print copy is accessible.</strong></p>"
+    }
+]

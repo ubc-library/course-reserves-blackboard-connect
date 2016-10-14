@@ -1,0 +1,297 @@
+<div id="reading-{{ key }}" class="reveal-modal xlarge noprint">
+<!-- <button class="btn btn-inverse btn-toggle-drop" onclick="$('#{{ key }}-bibdata').toggle('drop',125);">Toggle Bibliographic Details
+            </button> -->
+<div class="row-fluid">
+    <div class="span4">
+        <a href="/get/course/{{ course_id }}/hash/i.{{ reading.hash }}" target="_blank" class="btn">
+            View Item&nbsp;<i class="fa fa-external-link-square"></i>
+        </a>
+        <!-- <span><strong>Item Views: </strong><span class="{{ key }}-views-count"></span></span> -->
+    </div>
+    <div class="span4"></div>
+    <div class="span4"></div>
+</div>
+<hr style="margin: 10px 0 0;">
+
+<div id="reading-{{ key }}-content" class="reading-ps-container">
+
+
+<div id="{{ key }}-bibdata" style="padding-right: 20px; margin-top: 10px;">
+<div class="content">
+<div class="row-fluid">
+<div class="span8">
+    <!-- Reading -->
+    <fieldset>
+        <legend class="{{ key }}-legend">
+            <i class="fa fa-chevron-right lsit-caret" style="display: none;"></i>
+            <i class="fa fa-chevron-down lsit-caret"></i>
+            &nbsp;&nbsp;Required Information
+        </legend>
+        <div class="fieldset-content">
+            {% for rkey,value in reading.bibdata %}
+                {% if attribute(reading.requiredfields,rkey)==1 %}
+                    {% if rkey not in ['item_uri'] %}
+                        <div class="row-fluid" style="background-color: transparent;">
+                            <div class="span12">
+                                <label for="{{ key }}_{{ rkey }}">{{ attribute(reading.fieldtitles,rkey) }}</label>
+                                <input class="span12 stored bibdata-input {{ key }}-bibdata"
+                                       data-required="{{ attribute(reading.requiredfields,rkey)==1?'true':'false' }}"
+                                       type="text" id="{{ key }}_{{ rkey }}" value="{{ value }}"/>
+                            </div>
+                        </div>
+                    {% elseif rkey in ['item_uri'] and reading.format not in ['pdf_general','pdf_article','pdf_chapter','pdf_other'] %}
+                        {# if URL is not a controlled URL, then allow it to be edited #}
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <label class="control-label"
+                                       for="{{ key }}_{{ rkey }}">{{ attribute(reading.fieldtitles,rkey) }}:</label>
+
+                                <div class="controls">
+                                    <input class="span12 stored bibdata-input" type="text"
+                                           id="{{ key }}_{{ rkey }}" value="{{ value }}"/>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend class="{{ key }}-legend">
+            <i class="fa fa-chevron-right lsit-caret"></i>
+            <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+            &nbsp;&nbsp;Optional Information
+        </legend>
+        <div class="fieldset-content" style="display: none;">
+            {% for rkey,value in reading.bibdata %}
+                {% if attribute(reading.requiredfields,rkey)==0 %}
+                    {% if rkey not in ['item_uri'] %}
+                        <div class="row-fluid" style="background-color: transparent;">
+                            <div class="span12">
+                                <label for="{{ key }}_{{ rkey }}">{{ attribute(reading.fieldtitles,rkey) }}</label>
+                                <input class="span12 stored bibdata-input {{ key }}-bibdata"
+                                       data-required="{{ attribute(reading.requiredfields,rkey)==1?'true':'false' }}"
+                                       type="text" id="{{ key }}_{{ rkey }}" value="{{ value }}"/>
+                            </div>
+                        </div>
+                    {% elseif rkey in ['item_uri'] and reading.format not in ['pdf_general','pdf_article','pdf_chapter','pdf_other'] %}
+                        {# if URL is not a controlled URL, then allow it to be edited #}
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <label class="control-label"
+                                       for="{{ key }}_{{ rkey }}">{{ attribute(reading.fieldtitles,rkey) }}:</label>
+
+                                <div class="controls">
+                                    <input class="span12 stored bibdata-input" type="text"
+                                           id="{{ key }}_{{ rkey }}" value="{{ value }}"/>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend class="{{ key }}-legend">
+            <i class="fa fa-chevron-right lsit-caret"></i>
+            <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+            &nbsp;&nbsp;Notes &amp; Tags
+        </legend>
+        <div class="fieldset-content" style="display: none;">
+            <!-- Tags -->
+            <h4>Tags</h4>
+            {% for tagkey,tag in reading.tags %}
+                <div class="input-append input-tag" id="tag-wrapper-{{ tagkey }}">
+                    <button type="button" class="btn btn-tag btn-tag-management" data-tag="{{ tag.hash }}">{{ tag.name }}</button>
+                    <button class="btn btn-tag btn-tag-danger btn-tag-append btn-delete-tag" data-tag="{{ tagkey }}" type="button"
+                            onclick="removeTag({{ tagkey }},{{ key }},{{ course_id }})">x
+                    </button>
+                    <p>PURL: {{ tag.shorturl }}</p>
+                </div>
+            {% endfor %}
+            <span id="{{ key }}-tag-add-area"></span>
+
+            <div class="control-group" style="clear: both;">
+                <div class="controls input-append">
+                    <input style="width: 480px;" type="text" id="{{ key }}_add_student_tag" placeholder="semicolon; separated; tags"/>
+                </div>
+            </div>
+
+
+            <!-- Existing Notes (Staff) -->
+            <h4>Notes for Processing Staff</h4>
+
+            {% if reading.previous_notes %}
+                <div class="row-fluid">
+                    <div class="span12">
+                        {% for key,note in reading.previous_notes %}
+                            <p class="note-p" id="note-{{ note.note_id }}"><span class="note-content">{{ note.content }}</span><br>
+                                - <span class="note-author">{{ note.firstname }} {{ note.lastname }}</span>, <span
+                                        class="note-date">{{ note.timestamp|date("Y-m-d") }} {{ note.timestamp|date("g:i a") }}</span>
+                                <!-- <a href="#" data-note-edit-id="{{ note.note_id }}" title="Edit Note"><i class="icon-edit"></i></a>--></p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            <p>You can enter a message below for the Library Course Reserves Staff:</p>
+            <textarea style="width: 480px" rows="5" id="new-staff-note-{{ key }}" placeholder="Enter note here"></textarea><br>
+
+            <!-- Existing Note (Student) -->
+            <h4>Optional Notes/Instructions for Students</h4>
+
+            <p>You can enter a message below that will be shown to your students when they view this reading:</p>
+            {% if reading.student_note %}
+                <textarea style="width: 480px"
+                          rows="5"
+                          id="{{ key }}_existing_note_student"
+                          data-nid="{{ reading.student_note|first.note_id }}"
+                          placeholder="Enter note here">{{ reading.student_note|first.content }}</textarea><br>
+            {% else %}
+                <textarea style="width: 480px"
+                          rows="5"
+                          id="new-student-note-{{ key }}"
+                          placeholder="Enter note here"></textarea><br>
+            {% endif %}
+
+        </div>
+    </fieldset>
+</div>
+<div class="span4">
+    <fieldset>
+        <legend class="{{ key }}-legend">
+            <i class="fa fa-chevron-right lsit-caret" style="display: none;"></i>
+            <i class="fa fa-chevron-down lsit-caret"></i>
+            &nbsp;&nbsp;Request Options
+        </legend>
+        <div class="fieldset-content">
+            <!-- Availability -->
+            <div class="row-fluid" style="background-color: rgb(255, 249, 240);">
+                <label class="" for="{{ key }}_request_start_date">Item Available From</label>
+
+                <div class="date-span">
+                    <input class="date-span-input" type="text" id="{{ key }}_request_start_date"
+                           name="start_date" value=""
+                           onclick="resetSaveButton({{ course_id }},{{ key }});">
+                </div>
+                <br><span class="date-span-input-span"><em>Cannot be earlier than the start of the course</em></span>
+            </div>
+            <div class="row-fluid" style="background-color: transparent;">
+                <label class="" for="{{ key }}_request_end_date">Item Available Until</label>
+
+                <div class="date-span">
+                    <input class="date-span-input" type="text" id="{{ key }}_request_end_date"
+                           name="end_date" value=""
+                           onclick="resetSaveButton({{ course_id }},{{ key }});">
+                </div>
+                <br><span class="date-span-input-span"><em>Cannot be later than the end of the course</em></span>
+            </div>
+
+            <!-- Flag Required -->
+            <div class="row-fluid" style="background-color: transparent;">
+                <label class="">Required Reading</label>
+
+                <div class="span12">
+                    <label class="radio"><input type="radio" name="{{ key }}_update_required_reading" id="{{ key }}_required_reading_y" value="1">Yes</label>
+                    <label class="radio"><input type="radio" name="{{ key }}_update_required_reading" id="{{ key }}_required_reading_n"
+                                                value="0">No</label>
+                </div>
+            </div>
+
+            <!-- Loan Period -->
+            <div class="row-fluid" style="background-color: transparent;">
+                <div class="span12">
+                    <label class="" for="{{ key }}_{{ course_id }}_loanperiods">Loan Period</label>
+                    {% if reading.loanperiod_id != 21 %}
+                        <select id="{{ key }}_{{ course_id }}_loanperiods"
+                                onclick="resetSaveButton({{ course_id }},{{ key }});">
+                            {% for lpk, lpv in loanperiods %}
+                                {% if lpk != 21 %}
+                                    <option value="{{ lpk }}"{{ reading.loanperiod_id==lpk?'selected':'' }}>{{ lpv }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <select id="{{ key }}_{{ course_id }}_loanperiods">
+                            {% for lpk, lpv in loanperiods %}
+                                {% if lpk == 21 %}
+                                    <option value="{{ lpk }}" selected>{{ lpv }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+</div>
+
+<div class="row-fluid" id="{{ key }}-reads-row">
+    <div class="span12">
+        <fieldset>
+            <legend class="{{ key }}-legend">
+                <i class="fa fa-chevron-right lsit-caret"></i>
+                <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+                &nbsp;&nbsp;Item Views&nbsp;&nbsp;(<span class="{{ key }}-views-count"></span>)
+            </legend>
+            <div class="fieldset-content" style="display: none;">
+                <div id="{{ key }}-load-reads-here"></div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+
+<div class="row-fluid" id="{{ key }}-history-row">
+    <div class="span12">
+        <fieldset>
+            <legend class="{{ key }}-legend">
+                <i class="fa fa-chevron-right lsit-caret"></i>
+                <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+                &nbsp;&nbsp;Item History
+            </legend>
+            <div class="fieldset-content" style="display: none;">
+                <div id="{{ key }}-load-history-here"></div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+</div>
+
+</div>
+</div>
+<div class="row-fluid">
+    <div class="span4">
+        <button type="button" class="btn" id="{{ key }}_save_button"
+                onclick="startUpdate({{ course_id }},{{ key }},'{{ puid }}')">Save
+        </button>
+        &nbsp;
+        <button type="button" class="btn btn-inverse hasqtip" onclick="resetBibdataFields({{ key }})" title="Cancel Changes">Cancel</button>
+    </div>
+    <div class="span6">
+        <div id="{{ key }}-bibdata-success"></div>
+    </div>
+    <div class="span2">
+        <div style="text-align: right">
+            <button type="button" class="btn btn-danger hasqtip" onclick="cancelItem({{ course_id }},{{ key }})"
+                    title="Remove Item Request From This Course"><i class="fa fa-trash-o"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<a class="close-reveal-modal">&#215;</a>
+
+<script>
+    itemBibdata[{{ key }}] = {};
+    {% for rkey,value in reading.bibdata %}
+    {% if rkey not in ['item_uri'] %}
+    itemBibdata[{{ key }}].{{ rkey }} = '{{ value }}';
+    {% endif %}
+    {% endfor %}
+</script>
+
+</div>

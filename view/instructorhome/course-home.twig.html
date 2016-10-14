@@ -1,0 +1,453 @@
+<!-- moved subscription to subscription include SKK -->
+<div class="row-fluid">
+    <div class="span12">
+        {% if readings %}
+            <!-- options -->
+            <div class="row-fluid">
+                <div class="span9">
+                    <h3 class="noprint pull-left" style="margin: 0;">Readings</h3>
+                    {% if course_tags %}
+                        <h2 class="noprint" style="margin: 0"><a href="#" id="sh-tag-cloud" style="padding-left: 30px; padding-bottom: 0; vertical-align: text-bottom"><i class="fa fa-tags"></i>&nbsp;View Tags</a></h2>
+                        <div class="noprint" id="tag-cloud" style="display:none">
+                            {% for tag_id,tag_data in course_tags %}
+                                <a href="#" class="filter-table btn btn-tag"
+                                   style="vertical-align:middle;font-size:{{ tag_data.frequency }}px !important;"
+                                   data-tag="{{ tag_data.hash }}">{{ tag_data.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="span3">
+                    <button type="button" class="btn btn-inverse noprint pull-right" id="print_reading_list_button">Print Reading List</button>
+                </div>
+            </div>
+            <!-- /options -->
+
+            <!-- tags-filter -->
+            <div class="clearfix noprint"></div>
+            <br>
+            <div id="filter-indicator-wrapper" style="display: none" class="noprint">
+                <button type="button" class="btn btn-invis noprint" id="clear_filter_button">Clear Tag Filter:&nbsp;<span
+                            id="filter-indicator"></span>&nbsp;<!-- &#215; --></button>
+            </div>
+            <!-- /tags-filter -->
+
+            <!-- bulk-editing -->
+            <div class="clearfix noprint"></div>
+            <div class="row-fluid noprint">
+                <div class="span3">
+                </div>
+                <div class="span7">
+                    <h5><br></h5>
+                    <div class="row-fluid">
+                        <div class="span10" style="text-align: right">
+                            <div id="SetCIDates-action" class="bulk-actions-form hidden pull-right">
+                                <!--
+                                <strong>Start: </strong><input type="text" data-apiparam="startdate" id="bulk-edit-startdate-o" title="startdate" class="apiparam" max="{{ course_info.enddate }}" min="{{ course_info.startdate }}" />
+                                <strong>Start: </strong><input type="text" data-apiparam="startdate" id="bulk-edit-startdate-o" title="startdate" class="apiparam" max="{{ course_info.enddate }}" min="{{ course_info.startdate }}" />
+                                -->
+                                <strong class="pull-right">Dates selected must be within course Start and End date</strong><br />
+                                <strong>Start: </strong><input type="text" data-apiparam="startdate" id="bulk-edit-startdate" title="startdate" class="apiparam" />
+                                <strong>End: </strong><input type="text" data-apiparam="enddate" id="bulk-edit-enddate" title="enddate" class="apiparam" />
+                            </div>
+
+                            <div id="AddItemToTag-action" class="bulk-actions-form hidden pull-right">
+                                <strong>Available Course Tags: </strong><select id="AddItemToTag-value" title="AddItemToTag-value"></select>
+                            </div>
+
+                            <div id="DeleteItemFromTag-action" class="bulk-actions-form hidden pull-right">
+                                <strong>Available Tags to Remove: </strong><select id="DeleteItemFromTag-value" title="DeleteItemFromTag-value"></select>
+                            </div>
+
+                            <div id="SetCIRequired-action" class="bulk-actions-form hidden pull-right">
+                                <strong>The Selected Items Are: </strong>
+                                <select id="SetCIRequired-value" title="SetCIRequired-value">
+                                    <option value="1" data-apiparam="required" class="apiparam">Required Reading</option>
+                                    <option value="0" data-apiparam="required" class="apiparam">Optional Reading</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="span2">
+                            <button type="button" class="btn btn-inverse noprint pull-right" id="bulkEditTriggerCommand" disabled>Apply Changes</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="span2">
+                    <h5 class="pull-right">Bulk Editing Options</h5>
+                    <strong class="pull-right">Select Items First...</strong>
+                    <select id="bulk-edit-available-commands" title="bulk-edit-available-commands" class="pull-right" disabled>
+                        <option value="SetCIDates">Update Availability (Start & End) Dates</option>
+                        <option value="AddItemToTag">Add Existing Tag</option>
+                        <option value="DeleteItemFromTag">Delete Existing Tag</option>
+                        <option value="SetCIRequired">Set Required/Optional</option>
+                    </select>
+                </div>
+            </div>
+            <!-- /bulk-editing -->
+
+
+
+            <table id="instructor-readings" class="table table-data">
+                <thead>
+                <tr>
+                    <th class="noprint ih-col-01"></th>
+                    <th class="ih-col-02">ID</th>
+                    <th class="ih-col-03">Title</th>
+                    <th class="ih-col-04">Format</th>
+                    <th class="ih-col-05">Author</th>
+                    <th class="ih-col-06">Availability</th>
+                    <th class="noprint ih-col-07">Status</th>
+                    <th class="ih-col-08">Tags</th>
+                    <th class="noprint ih-col-09">Actions</th>
+                    <th class="ih-col-10">Permanent URL</th>
+                    <th class="ih-col-11">Read (of&nbsp;{{ course_info.enrolled_seats }})</th>
+                    <th class="noprint ih-col-12"></th>
+                </tr>
+                </thead>
+                <tbody id="sortable">
+                {% for key,reading in readings %}
+                    <tr id="reading-{{ key }}">
+                        <td class="reading-handle noprint"><i class="fa fa-arrows-v fa-2x"></i></td>
+                        <td class="instructor-reading-itemid">{{ key }}</td>
+                        <td class="instructor-reading-title">
+                            <a href="{{ key }}" class="show-details show-details-{{ key }}">{{ reading.title }}</a>
+                            {% if reading.bibdata.journal_title and reading.bibdata.journal_title != '' %}
+                                <br>{{ reading.bibdata.journal_title }}
+                                {% if reading.bibdata.journal_volume and reading.bibdata.journal_volume != '' %}
+                                <br> Volume: {{ reading.bibdata.journal_volume }}
+                                {% endif %}
+                                {% if reading.bibdata.journal_issue and reading.bibdata.journal_issue != '' %}
+                                &nbsp; Issue: {{ reading.bibdata.journal_issue }}
+                                {% endif %}
+                            {% endif %}
+                            {% if reading.bibdata.collection_title and reading.bibdata.collection_title != '' %}
+                                <br>{{ reading.bibdata.collection_title }}
+                            {% endif %}
+                            {% if reading.bibdata.item_edition and reading.bibdata.item_edition != '' %}
+                            <br>Edition: {{ reading.bibdata.item_edition }}
+                            {% endif %}
+                        </td>
+                        <td class="instructor-reading-format" style="text-align: center"><i class="fa fa-{{ reading.format_icon }} fa-2x"></i></td>
+                        <td class="instructor-reading-authors">{{ reading.author }}</td>
+                        <td class="instructor-reading-active">{{reading.active}}<br />to<br />{{ reading.inactive }}</td>
+                        <td class="instructor-reading-status noprint">{{ reading.status }}</td>
+                        <td class="instructor-reading-tags" data-taglist="{{ reading.taglist }}">{% for tag in reading.tags %}<a href="#"
+                                                                                                                                 class="filter-table btn btn-tag"
+                                                                                                                                 data-tag="{{ tag.hash }}">{{ tag.name }}</a>{% endfor %}
+                        </td>
+                        <td class="noprint">
+                            <ul class="action-list">
+                                <!-- <li><a href="#" class="view-purl" data-go-url="{{ reading.purl }}">PURL</a></li> -->
+                                <li>
+                                    <button id="open-instructor-reading-{{ key }}"
+                                            class="show-details-trigger btn btn-inverse open-instructor-reading"
+                                            data-trigger="{{ key }}"
+                                            data-course-start="{{ reading.course_start }}"
+                                            data-course-end="{{ reading.course_end }}"
+                                            data-request-start="{{ reading.request_start }}"
+                                            data-request-end="{{ reading.request_end }}"
+                                            data-instance_id="{{ reading.instance_id }}"
+                                            data-required="{{ reading.required == true?'true':'false' }}"
+                                            data-edit="true"
+                                            data-get="/get/course/{{ course_info.course_id }}/hash/i.{{ reading.hash }}"
+                                            data-title="{{ reading.title }}"
+                                            data-author="{{ reading.author }}"
+                                            data-calln="{{ reading.callnum ? reading.callnum : '' }}"
+                                            data-loanp="{{ reading.loanperiod_id }}"
+                                            data-tags='{% if reading.tags %}{{ reading.tags|json_encode }}{% endif %}'
+                                            data-note='{% if reading.previous_notes %}{{ reading.previous_notes|json_encode }}{% endif %}'
+                                            data-studentnote='{% if reading.student_note %}{{ reading.student_note|json_encode }}{% endif %}'
+                                            data-urls='{% if reading.additional_access %}{{ reading.additional_access|json_encode }}{% endif %}'
+                                            data-fields='{% if reading.bibdata %}{{ reading.bibdata|json_encode }}{% endif %}'
+                                            data-fieldsreqd='{% if reading.requiredfields %}{{ reading.requiredfields|json_encode }}{% endif %}'
+                                            data-fieldtitles='{% if reading.fieldtitles %}{{ reading.fieldtitles|json_encode }}{% endif %}'
+                                            data-format='{{ reading.format }}'
+                                            style="font-size: 12px;">Edit&nbsp;
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    &nbsp;
+                                    <a href="/get/course/{{ course_id }}/hash/i.{{ reading.hash }}"
+                                       target="_blank"
+                                       class="btn btn-inverse"
+                                       style="font-size: 12px;">
+                                        View&nbsp;<i class="fa fa-external-link-square"></i></a>
+                                </li>
+                            </ul>
+                        </td>
+                        <td><a target="_blank" href="{{ reading.purl }}">{{reading.purl}}</a></td>
+                        <td class="instructor-times-read">{{ reading.times_read }}</td>
+                        <td class="instructor-times-read">
+                            <input type="checkbox" title="item-{{ key }}-checkbox" id="item-checkbox-{{ key }}" value="{{ key }}" class="batch-edit-checkbox"
+                                   data-itemID="{{ key }}"
+                                   data-courseID="{{ course_id }}"
+                                   data-puid="{{ puid }}"
+                                   data-format="{{ reading.format }}"
+                                   data-tags="{% for tag in reading.tags %}{{ tag.tag_id }}__HASHNAME__{{ tag.name }}__END__{% endfor %}"
+                                   data-courseDateStart="{{ reading.course_start }}"
+                                   data-courseDateEnd="{{ reading.course_end }}"
+                            /></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h3 style="margin: 0;">Readings</h3>
+            <p>No readings.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ################################################################################################################################################# -->
+
+
+
+<div id="instructor-reading-modal" class="instructor-dialog" style="display:none">
+    <div class="instructor-dialog-content ">
+        <div class="row-fluid expand">
+            <div class="span12" id="instructor-reading-urls">
+                <a href="" target="_blank" class="btn btn-success" id="insert-reading-get">View Item&nbsp;<i class="fa fa-external-link-square"></i></a>
+                <!-- additional urls populated via js -->
+            </div>
+            <div id="instructor-reading-save-progress" class="row-fluid expand" style="display: none">
+                <!-- status -->
+                <p style="text-align: center">Saving...</p>
+                <!-- progress bar -->
+                <div class="progress progress-striped active" style="margin: 0">
+                    <div class="bar" style="width: 0%;" id="save-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+        <hr style="margin: 10px 0 0;">
+        <div id="instructor-reading-content" class="reading-ps-container">
+            <div class="content">
+                <div class="row-fluid">
+                    <div class="span8">
+                        <fieldset>
+                            <legend class="legend" id="required-legend">
+                                <i class="fa fa-chevron-down lsit-caret"></i>&nbsp;&nbsp;Required Information
+                            </legend>
+                            <div class="fieldset-content" id="instructor-reading-required-bibdata"><!-- bibdata populated via js --></div>
+                        </fieldset>
+                        <fieldset>
+                            <legend class="legend" id="optional-legend">
+                                <i class="fa fa-chevron-right lsit-caret"></i></i>&nbsp;&nbsp;Optional Information
+                            </legend>
+                            <div class="fieldset-content" id="instructor-reading-optional-bibdata" style="display: none;">
+                                <!-- bibdata populated via js --></div>
+                        </fieldset>
+                        <fieldset>
+                            <legend class="legend" id="note-legend">
+                                <i class="fa fa-chevron-right lsit-caret"></i>&nbsp;&nbsp;Notes &amp; Tags
+                            </legend>
+                            <div class="fieldset-content" id="instructor-reading-notes-tags" style="display: none;">
+                                <!-- Tags -->
+                                <h4 id="instructor-reading-tag-header">Tags</h4>
+
+                                <span id="tag-add-area"></span>
+
+                                <div class="control-group" style="clear: both;">
+                                    <div class="controls input-append">
+                                        <em>Multiple tags? Separate each with a semi-colon ';'</em>
+                                        <input type="text" id="add_student_tag" placeholder="Semicolon; separated; tags"/>
+                                        <!-- <button id="submit_student_tags">Add Tags</button> -->
+                                    </div>
+                                    <div id="tag_suggestions_add_student_tag"></div>
+                                </div>
+
+
+                                <!-- Existing Notes (Staff) -->
+                                <h4>Notes for Processing Staff</h4>
+
+
+                                <div class="row-fluid">
+                                    <div class="span12" id="instructor-reading-staff-note-area">
+                                    </div>
+                                </div>
+
+                                <p>You can enter a message below for the Library Course Reserves Staff:</p>
+                                <textarea style="width: 480px" rows="5" id="new-staff-note" placeholder="Enter note here"></textarea><br>
+
+                                <!-- Existing Note (Student) -->
+                                <h4 id="instructor-reading-student-note-header">Optional Notes/Instructions for Students</h4>
+
+
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Right Hand Column -->
+                    <div class="span4">
+                        <fieldset>
+                            <legend class="legend" id="request-legend"><i class="fa fa-chevron-down lsit-caret"></i>&nbsp;&nbsp;Request Options</legend>
+                            <div class="fieldset-content">
+                                <!-- Availability - Start Date -->
+                                <div class="row-fluid" style="background-color: rgb(255, 249, 240);">
+                                    <label class="" for="request_start_date">Item Available From</label>
+
+                                    <div class="date-span">
+                                        <input class="date-span-input" type="text" id="request_start_date" name="start_date" value=""
+                                               onclick="resetReadingPopupSaveButton();">
+                                    </div>
+                                    <br><span class="date-span-input-span"><em>Cannot be earlier than the start of the course</em></span>
+                                </div>
+
+                                <!-- Availability - End Date -->
+                                <div class="row-fluid" style="background-color: transparent;">
+                                    <label class="" for="request_end_date">Item Available Until</label>
+
+                                    <div class="date-span">
+                                        <input class="date-span-input" type="text" id="request_end_date" name="end_date" value=""
+                                               onclick="resetReadingPopupSaveButton();">
+                                    </div>
+                                    <br><span class="date-span-input-span"><em>Cannot be later than the end of the course</em></span>
+                                </div>
+
+                                <!-- Flag Required -->
+                                <div class="row-fluid" style="background-color: transparent;">
+                                    <label class="">Required Reading</label>
+
+                                    <div class="span12">
+                                        <label class="radio"><input type="radio" name="update_required_reading" id="required_reading_y"
+                                                                    value="1">Yes</label>
+                                        <label class="radio"><input type="radio" name="update_required_reading" id="required_reading_n"
+                                                                    value="0">No</label>
+                                    </div>
+                                </div>
+
+                                <!-- Loan Period -->
+                                <div class="row-fluid" style="background-color: transparent;">
+                                    <div class="span12">
+                                        <label class="" for="loanperiods" id="loanperiods-label">Loan Period</label>
+                                        <!-- loanperiods filled via js -->
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row-fluid" id="instructor-reading-reads-row">
+                    <div class="span12">
+                        <fieldset>
+                            <legend class="legend" id="views-legend">
+                                <i class="fa fa-chevron-right lsit-caret"></i>
+                                <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+                                &nbsp;&nbsp;Item Views&nbsp;&nbsp;(<span id="instructor-reading-views-count">0</span>)
+                            </legend>
+                            <div class="fieldset-content" style="display: none;">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Times Read</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="instructor-reading-load-reads-here">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+
+                <div class="row-fluid" id="instructor-reading-history-row">
+                    <div class="span12">
+                        <fieldset>
+                            <legend class="legend" id="history-legend">
+                                <i class="fa fa-chevron-right lsit-caret"></i>
+                                <i class="fa fa-chevron-down lsit-caret" style="display: none;"></i>
+                                &nbsp;&nbsp;Item History
+                            </legend>
+                            <div class="fieldset-content" style="display: none;">
+                                <table class="table table-border">
+                                    <thead>
+                                    <tr>
+                                        <td>Time</td>
+                                        <td>Status</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="instructor-reading-load-history-here">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span6">
+                <button type="button" class="btn" id="instructor-reading-save">Save Changes</button>
+                &nbsp;
+                <button type="button" class="btn btn-inverse hasqtip" id="instructor-reading-reset" title="Cancel Changes">Reset Form (Cancel Changes)
+                </button>
+            </div>
+            <div class="span5">
+                <div id="bibdata-success"></div>
+            </div>
+            <div class="span1">
+                <div style="text-align: right">
+                    <button type="button" class="btn btn-danger hasqtip" id="instructor-reading-cancel"
+                            title="Remove Item Request From This Course"><i class="fa fa-trash-o"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {#<a class="btn btn-info close-reveal-modal">&#215;</a>#}
+    </div>
+</div>
+
+
+
+<div id="bulk-editing-modal" class="bulk-editing-dialog" style="display:none">
+    <div class="bulk-editing-dialog-content ">
+        <div class="row-fluid expand">
+            <div class="span12">
+                <h3 id="bulk-editing-modal-title">Bulk Editing Progress</h3>
+                <!-- additional urls populated via js -->
+            </div>
+        </div>
+        <hr style="margin: 10px 0 0;">
+        <div id="bulk-editing-content" class="reading-ps-container">
+            <div class="content">
+                <div class="row-fluid">
+                    <div class="span12" id="bulk-editing-progress">
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12"><p><em>Page will reload when you close this dialog</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% if readings %}
+    <script>
+        {% for key,reading in readings %}
+            itemBibdata[{{ key }}] = {};
+            {% for rkey,value in reading.bibdata %}
+                //this is why it fails
+                {% if rkey not in ['item_uri'] %}
+                //itemBibdata[{{ key }}].{{ rkey }} = '{{ value }}';
+                {% endif %}
+                itemBibdata[{{ key }}].{{ rkey }} = '{{ value }}';
+            {% endfor %}
+        {% endfor %}
+    </script>
+{% endif %}
+
+
+<script>
+    var puid = '{{ puid }}';
+    var course_id = '{{course_id}}';
+    var print_bool = {{ print }};
+    var debug = true; //Todo Sean: turn off later.
+    var loanperiods = $.parseJSON('{{ loanperiods|json_encode|raw }}');
+    var courseDateStart = '{{ course_info.startdate }}';
+    var courseDateEnd = '{{ course_info.enddate }}';
+</script>
+
+<script src="{{ env_url }}/staticfile/view/instructorhome/res/course-home.js"></script>

@@ -1,0 +1,15 @@
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ubc-library/lti"
+        }
+    ],
+    "require": {
+        "twig/twig": "@stable",
+        "tecnickcom/tcpdf": "@stable",
+        "setasign/fpdi": "@stable",
+        "setasign/fpdi-tcpdf": "@stable",
+        "ubc-library/lti": "dev-master"
+    }
+}

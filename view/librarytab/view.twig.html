@@ -1,0 +1,188 @@
+<div class="content row-fluid expand" role="main" style="width: 100%">
+	<div class="span6">
+		<div class="portlet">
+			<h2>10 Things to Know about UBC Library</h2>
+			<div id="top10">{{top10|raw}}</div>
+		</div>
+	</div>
+	<div class="span6">
+		<div class="portlet">
+			{% if programs %}
+			<h2>My Programs</h2>
+			<ul>
+				{%for program_id,program_data in programs %}
+				<li><a href="/program/id/{{program_id}}">{{program_data.name}}
+						class of {{program_data.gradyear}}</a></li> {% endfor %}
+			</ul>
+			{% endif %}
+
+            {% if allcourses %}
+			<h2>Courses</h2>
+			<ul id="tab" class="nav nav-tabs">
+				{% if courses %}
+				    <li><a href="#course_tab_enrolled" data-toggle="tab">Enrolled</a></li>
+				{% endif %}
+				<li><a href="#course_tab_search" data-toggle="tab">Search</a></li>
+				<li><a href="#course_tab_previous" data-toggle="tab">Previous
+						Searches</a></li>
+			</ul>
+			<div id="tabcontent" class="tab-content">
+				{% if courses %}
+				<div class="tab-pane" id="course_tab_enrolled">
+					<label class="inline" for="studentcurrentonly"> <input
+						type="checkbox" id="studentcurrentonly" checked="checked" />
+						Currently enrolled courses only
+					</label>
+					<table class="coursetable">
+						<thead id="enrolledcourses_head">
+							<tr>
+								<th colspan="3">Enrolled Courses</th>
+							</tr>
+							<tr>
+								<th>Course</th>
+								<th>Location/<br />Branch
+								</th>
+								<th>Reserve Items</th>
+							</tr>
+						</thead>
+						<tbody id="enrolledcourses">
+							{% for course_id,course in courses %}
+							<tr class="current{{course.current}}">
+								<td>{%if course.role_name == 'Student' %} <a
+									href="{{baseurl}}/studenthome/id/{{course_id}}">{{course.title}}</a>
+									{% else %} <span
+									title="You have {{course.role_name}} role in this course."
+									class="nonstudent"> <a
+										href="{{baseurl}}/instructorhome/id/{{course_id}}">{{course.title}}</a>
+										*
+								</span> {% endif %}
+								</td>
+								<td>{{course.location}}<br />{{course.branch}}
+								</td>
+								<td>{{course.visible}}/{{course.total}}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% endif %}
+				<div class="tab-pane" id="course_tab_search">
+					<input id="csearch" type="search" class="inline"
+						placeholder="Search by course name or code (e.g. ANTH111)" />
+					<button class="btn inline" id="clr">Clear</button>
+					<br /> <label class="inline" for="currentonly"> <input
+						type="checkbox" id="currentonly" checked="checked" /> Current and future
+						courses only
+					</label>
+					<div id="numresults">Waiting for search.</div>
+					<table class="coursetable">
+						<thead id="courselist_head" style="display: none">
+							<tr>
+								<th colspan="3">Search Results</th>
+							</tr>
+							<tr>
+								<th>Course</th>
+								<th>Location/<br />Branch
+								</th>
+								<th>Reserve Items</th>
+							</tr>
+						</thead>
+						<tbody id="courselist" style="display: none">
+							<tr>
+								<td>
+									<!--  -->
+								</td>
+								<td>
+									<!--  -->
+								</td>
+								<td>
+									<!--  -->
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="tab-pane" id="course_tab_previous">
+					<table class="coursetable">
+						<thead id="prevsearches_head" style="display: none">
+							<tr>
+								<th colspan="3">Previous Searches</th>
+							</tr>
+							<tr>
+								<th>Course</th>
+								<th>Location/<br />Branch
+								</th>
+								<th>Reserve Items</th>
+							</tr>
+						</thead>
+						<tbody id="prevsearches" style="display: none">
+							{% for ps in prevsearches %}
+							<tr>
+								<td><i class="icon icon-remove clearprevioussearch"
+									data-class_id="{{ps.course_id}}" title="Remove"></i> <a
+									href="{{baseurl}}/instructorhome/id/{{ps.course_id}}">{{ps.title}}</a>
+								</td>
+								<td>{{ps.location}}<br />{{ps.branch}}
+								</td>
+								<td>{{ps.visible}}/{{ps.total}}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			{% else %}
+			<h2>My Courses</h2>
+			<label class="inline" for="studentcurrentonly"> <input
+				type="checkbox" id="studentcurrentonly" checked="checked" />
+				Currently enrolled courses only
+			</label>
+			<div id="tablewrap">
+				<table class="coursetable">
+					<thead>
+						<tr>
+							<th>Course</th>
+							<th>Branch</th>
+							<th>Readings</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for course_id,course in courses %}
+						<tr class="current{{course.current}}">
+							<td>{%if course.role_name == 'Student' %} <a
+								href="{{baseurl}}/studenthome/id/{{course_id}}">{{course.title}}</a>
+								{% else %} <span
+								title="You have {{course.role_name}} role in this course."
+								class="nonstudent"> <a
+									href="{{baseurl}}/instructorhome/id/{{course_id}}">{{course.title}}</a>
+									*
+							</span> {% endif %}
+							</td>
+							<td>{{course.branch}}</td>
+							<td>{{course.visible}}</td>
+						</tr>
+						{% endfor %}
+				</table>
+			</div>
+			{% endif %}
+		</div>
+		{% if allcourses == false %}
+		{% if contacts %}
+		<div class="portlet">
+			<h2>My Library Contacts</h2>
+			<ul>
+				{% for dept,contactlist in contacts %}
+				<li>{{dept|upper}}
+					<ul>
+						{% for contact in contactlist %}
+						<li><a href="mailto:{{contact.email}}">{{contact.name}}</a></li>
+						{% endfor %}
+					</ul>
+				</li> {% endfor %}
+			</ul>
+		</div>
+		{% endif %} 
+		{% endif %}
+	</div>
+</div>

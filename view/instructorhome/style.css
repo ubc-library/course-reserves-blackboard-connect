@@ -1,0 +1,201 @@
+.container {
+    padding: 20px 0px !important;
+}
+
+.fieldset-content {
+    margin-bottom: 7px;
+}
+
+.ps-container .ps-scrollbar-y-rail {
+    position: absolute;
+    width: 8px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    opacity: 1;
+    filter: alpha(opacity=0);
+    -o-transition: background-color .2s linear, opacity .2s linear;
+    -webkit-transition: background-color .2s linear, opacity .2s linear;
+    -moz-transition: background-color .2s linear, opacity .2s linear;
+    transition: background-color .2s linear, opacity .2s linear;
+    background-color: #E9E9E9;
+}
+
+.ih-col-01 {
+    width: 2% !important;
+}
+
+.ih-col-02 {
+    width: 3% !important;
+}
+
+.ih-col-03 {
+    width: 19% !important;
+}
+
+.ih-col-04 {
+    width: 4% !important;
+}
+
+.ih-col-05 {
+    width: 17% !important;
+}
+
+.ih-col-06 {
+    width: 8% !important;
+}
+
+.ih-col-07 {
+    width: 10% !important;
+}
+
+.ih-col-08 {
+    width: 9% !important;
+}
+
+.ih-col-09 {
+    width: 13% !important;
+}
+
+.ih-col-10 {
+    width: 10% !important;
+}
+
+.ih-col-11 {
+    width: 5% !important;
+}
+
+#filter-indicator-wrapper {
+    display: block;
+    background-color: #1C78CC;
+    padding: 10px;
+}
+
+.btn-invis {
+    background-color: transparent;
+    background-image: -ms-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(rgba(0, 0, 0, 0)), to(rgba(0, 0, 0, 0)));
+    background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+    background-image: -o-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+    background-image: -moz-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0));
+    background-repeat: repeat-x;
+    border: transparent;
+    border-color: rgba(0, 0, 0, 0);
+    border-color: transparent;
+    color: #fff;
+    filter: none;
+    text-decoration: none;
+    text-shadow: none;
+    font-weight: bold;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.btn-invis:hover  {
+    background-color: rgba(255, 255, 255, 0) !important;
+    border-color: rgba(255, 255, 255, 0) !important;
+    color: #fff;
+}
+
+.btn-invis:hover #filter-indicator {
+    color: rgb(145, 15, 15);
+    text-decoration: line-through;
+}
+
+.reading-ps-container {
+    margin-bottom: 15px;
+}
+
+.outer-tag-div {
+    margin-bottom: 8px;
+}
+
+#instructor-reading-tag-header, #instructor-reading-student-note-header {
+    margin: 0 0 10px 0;
+    font-weight: 300;
+}
+
+.reveal-modal .close-reveal-modal {
+    position: absolute;
+    top: 0 !important;
+    right: 0 !important;
+}
+
+#submit_student_tags {
+    float: right;
+    height: 30px;
+}
+
+#add_student_tag {
+    width: 480px;
+    font-size: 12px;
+}
+
+#instructor-reading-content .fieldset-content .row-fluid:focus {
+    background-color: rgb(255, 235, 197);
+}
+
+#instructor-reading-content .fieldset-content .row-fluid:not(:focus) {
+    background: transparent;
+}
+
+/* Reading List styles for when being printed */
+@page {
+    size: landscape;
+}
+@media print {
+    body { 
+        zoom:0.65;
+    }
+    * {
+        background-color: transparent !important;
+    }
+
+    
+    #header, #nav, #footer, .noprint {
+        display: none;
+    }
+
+    #container, .row, #content {
+        width: 100%; margin: 0; float: none; overflow:hidden !important;
+    }
+    
+    h1, h2, h3, h4, h6 {
+        font-weight: 400 !important;
+        color: #121212 !important;
+    }
+
+    #student-readings_wrapper {
+        display: block;
+        overflow: visible;
+    }
+    
+    table, thead, tbody, tfoot, tr, td, .sorting, .sorting_disabled, .sorting_1, .sorting_asc, .sorting_desc{
+        background-color: transparent !important;
+        border: none;
+        font-size: 9pt;
+        text-decoration: none;
+        color: #121212;
+    }
+    
+    div.dataTables_length, div.dataTables_filter,
+    div.dataTables_paginate, div.dataTables_info {
+        /*display: none;*/
+    }
+
+    a {
+        text-decoration: none;
+        color: #121212;
+    }
+    a:link, a:visited {
+        text-decoration: none;
+        color: #781351
+    }
+}
+
+
+#ui-datepicker-div {
+    width: 230px !important;
+}

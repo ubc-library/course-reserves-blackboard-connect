@@ -1,0 +1,213 @@
+<div id="content">
+	<div class="row-fluid expand">
+		<div class="span9">
+			<h2>{{program_info.name}}</h2>
+			<h3>Graduation year {{program_info.gradyear}}</h3>
+		</div>
+		<!-- LOCRSUPP-366  --  https://jira.library.ubc.ca:8443/browse/LOCRSUPP-366 -- removed links to UVic etc. -->
+	</div>
+	<div class="row-fluid expand">
+		<!-- left hand side -->
+		<div class="span2">
+
+			<div id="insert-search-here"></div>
+
+			<h5 style="border-bottom: 1px solid #eee;">
+				Courses
+			</h5>
+			<ul class="button-list filter-list" id="course-filter-list">
+				{% for course_tag,course_ids in coursetags %}
+				<li>
+					<button
+						class="course-button btn btn-tag btn-tag-alt btn-tag-rect {% for course_id in course_ids %}c{{course_id}}{% endfor %}"
+						data-active="false"
+						data-filter="{% for course_id in course_ids %}c{{course_id}} {% endfor %}"
+						>{{course_tag}}</button>
+				</li> {% endfor %}
+			</ul>
+			<h5 style="border-bottom: 1px solid #eee;">
+				Tags
+			</h5>
+      <h6>
+        Filter Match:
+        <div class="btn-group btn-sort-modifiers"
+          style="float: right; margin: 0px 0 10px 0;">
+          <button type="button" class="btn btn-success btn-modifier"
+            data-sort="any" data-selected="true">ANY</button>
+          <button type="button" class="btn btn-inverse btn-modifier"
+            data-sort="all" data-selected="false">ALL</button>
+        </div>
+      </h6>
+
+			<ul class="button-list filter-list" id="tag-filter-list">
+				{% for tag_hash,tag_data in tags %}
+				<li><button
+						class="tag-button btn tag btn-warn btn-tag btn-tag-rect {{tag_hash}}{%for tag_id in tag_data.tag_course_ids %} c{{tag_id}}{% endfor %}"
+						data-filter="{{ tag_hash }}" id="btn_{{ tag_hash }}"
+						data-active="false">{{tag_data.tag_name}}</button></li> {% endfor %}
+			</ul>
+		</div>
+		<!-- ./span2 -->
+
+		<!-- right hand side -->
+		<div class="span10">
+			<h4>
+				Program Readings (<span id="reading-filter-count"></span> of {{
+				items|length }})&nbsp;&nbsp;&nbsp;<img src="/images/ajax-loader.gif"
+					id="ajax-loader" width="32" height="32" style="display: none;">
+			</h4>
+			<div class="alert alert-info alert-reading" id="no-readings-alert"
+				style="display: none;">No readings with the selected filters.</div>
+			<div class="alert alert-info alert-reading" id="instructions-alert">Select
+				filters on the left to filter readings.</div>
+
+			<table id="program-readings" class="table table-data">
+				<thead>
+					<tr>
+						<th class="">Required</th>
+						<th class="">Title</th>
+						<th class="">Author</th>
+						<th class="">Call Number</th>
+						<th class="">Loan Period</th>
+						<th class="">Courses</th>
+						<th class="">Tags</th>
+					</tr>
+				</thead>
+				<tbody id="sortable">
+					{% for item_id,item in items %}
+					<tr
+						class="rdg {%for course_id in item.course_ids%} c{{course_id}}{%endfor%} {%for tag_info in item.tags%} {{tag_info.hash}}{%endfor%}"
+						id="{{ item_id }}">
+						<td>{{ item.required == 1 ? '<i class="fa fa-flag fa-3x"></i>'
+							: '' }}
+						</td>
+						<td><a href="javascript:void(0);" id="i_{{ item.hash }}"
+							class="med-reading-name open-program-reading"
+							data-get="/get/course/{{ item.course_ids|first }}/hash/i.{{ item.hash }}"
+							data-title="{{ item.title }}"
+							data-author="{{ item.author?item.author ~ '. ':'' }}"
+							data-calln="{{ item.callnumber ? item.callnumber : '' }}"
+							data-loanp="{{ item.loanperiod ? item.loanperiod : '' }}"
+							data-tags="{% if item.tags %}{% for tag_id,tag_info in item.tags %}{{ tag_info.name }}; {% endfor %} {% else %}There are no tags for this reading{% endif %}"
+							data-urls='{% if item.additional_access %}{{ item.additional_access|json_encode }}{% endif %}'>
+								{{ item.title }}</a> <!-- <a href="{{ item.purl }}" target="_blank" class="med-reading-name">{{ item.title }}</a> -->
+						</td>
+						<td>{{ item.author?item.author ~ '. ':'' }}</td>
+						<td>{{ item.callnumber ? item.callnumber : '' }}</td>
+						<td>{{ item.loanperiod ? item.loanperiod : '' }}</td>
+						<td class="instructor-course-tags">{% if item.course_ids %}
+							{% for course_id in item.course_ids %} <a
+							href="javascript:void(0);"
+							class="course-button btn btn-tag btn-tag-alt c{{course_id}}"
+							data-filter="c{{course_id}}" data-tag="c{{ course_id }}">{{
+								shortcodeof[course_id] }} </a> {% endfor %} {% endif %}
+						</td>
+						<td class="instructor-reading-tags">{% if item.tags %} {% for
+							tag_id,tag_info in item.tags %} <a href="javascript:void(0);"
+							class="tag-button btn btn-tag{% for course_id in tags_courses[tag_info.hash] %} c{{course_id}}{% endfor %} {{tag_info.hash}}"
+							data-filter="{{ tag_info.hash }}">
+								{{ tag_info.name }} </a> {% endfor %} {% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+		<!-- ./span10 -->
+	</div>
+</div>
+
+
+<div id="program-reading"
+	class="reveal-modal student-modal xlarge noprint">
+	<div id="reading-content">
+		<div class="row-fluid expand">
+			<h2 style="margin: 0; font-weight: 300; font-size: 18px;">Item
+				Access</h2>
+		</div>
+		<div class="row-fluid expand">
+			<div class="span8">
+				<strong>Description</strong>
+			</div>
+			<div class="span4">
+				<strong>URL</strong>
+			</div>
+		</div>
+		<div class="row-fluid expand">
+			<div class="span8 program-item-url">To access the course
+				material, please use the following link:</div>
+			<div class="span4">
+				<a href="" target="_blank" class="btn btn-success"
+					id="insert-reading-get">View Item&nbsp;<i
+					class="fa fa-external-link-square"></i></a>
+			</div>
+		</div>
+
+		<div class="row-fluid expand" id="additional-urls-area">
+			<div class="span12">
+				<strong>The following supplementary URLs have been provided
+					for this Course Material:</strong>
+			</div>
+		</div>
+		<div id="place-additional-urls-after">
+			</di onclick="triggerFilter(this,false)"v>
+
+			<hr>
+			<div class="row-fluid expand">
+				<div class="span12">
+					<h2 style="margin: 0; font-weight: 300; font-size: 18px;">Tags</h2>
+					<p id="insert-reading-tags"></p>
+				</div>
+			</div>
+
+			<hr>
+			<div class="row-fluid expand">
+				<div class="span12">
+					<h2 style="margin: 0; font-weight: 300; font-size: 18px;">Bibliographic
+						Information</h2>
+					<strong>Title: </strong><span id="insert-reading-title"></span><br>
+					<strong>Author: </strong><span id="insert-reading-author"></span><br>
+					<strong>Call Number: </strong><span id="insert-reading-calln"></span><br>
+					<strong>Loan Period: </strong><span id="insert-reading-loanp"></span><br>
+				</div>
+			</div>
+		</div>
+
+
+		<a class="close-reveal-modal">&#215;</a>
+	</div>
+
+
+	<script>
+    var itemTags = [
+      {% for tag_hash,tag_data in tags %}
+        '{{tag_hash}}',// : '{{tag_data.tag_name|e('js')}}',
+      {% endfor %}
+        false
+    ];
+    itemTags.pop();
+    
+    var courseTags = [
+      {% for course_tag,course_ids in coursetags %}
+        {% for course_id in course_ids %}
+          'c{{course_id}}',// : '{{course_tag|e('js')}}',
+        {% endfor %}
+      {% endfor %}
+      false 
+    ];
+    courseTags.pop();
+
+    $(function(){
+        $tagFilterButtons=$('#tag-filter-list button');
+        $courseFilterButtons=$('#course-filter-list button');
+        $readingRows=$('#program-readings tbody tr');
+        $readingRowsCourse=$('#program-readings a.course-button');
+        $readingRowsTag=$('#program-readings a.tag-button');
+        $("#program-readings_filter").hide().clone(true).appendTo("#insert-search-here").show();
+        {%if showtag %}
+        setTimeout(function(){$('button.{{showtag}}').click();},100);
+        {%endif%}
+        updateDisplay();
+      });
+</script>

@@ -1,0 +1,21 @@
+{% if enrolled %}
+<div class="row-fluid noprint">
+    <div class="span12">
+        {% if subscription == 1 %}
+        <p>You are currently <span id="subscription-status" class="label label-success">SUBSCRIBED</span> to this course,
+            and will <span id="subscription-not"></span> receive notifications when new readings are available. &nbsp;&nbsp;&nbsp;
+            <button id="subscribe-toggle" class="btn btn-inverse" value="Unsubscribe">Unsubscribe</button></p>
+        {% else %}
+        <p>You are currently <span id="subscription-status" class="label label-important">NOT SUBSCRIBED</span> to this course,
+            and will <span id="subscription-not">not</span> receive notifications when new readings are available. &nbsp;&nbsp;&nbsp;
+            <button id="subscribe-toggle" class="btn btn-warning" value="Subscribe">Subscribe</button></p>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="row-fluid noprint">
+    <div class="span12">
+        <p>You must be enrolled in this course to subscribe to email notifications.</p>
+    </div>
+</div>
+{% endif %}

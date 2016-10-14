@@ -1,0 +1,10 @@
+.idea/
+lib/
+composer.phar
+
+cache/*
+vendor/
+
+www/locrjs.js
+
+config.ini

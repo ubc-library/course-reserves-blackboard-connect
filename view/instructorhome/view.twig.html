@@ -1,0 +1,24 @@
+<div class="alert alert-info noprint" style="margin-bottom: 2px;">
+  <i class="icon icon-caret-right"></i> <a href="{{studentmode}}">Switch to Student Mode</a>
+</div>
+
+<div id="content">
+    <h4 style="margin: 0 0 5px 0;">{{course_info.title}}</h4>
+    <h5 style="margin: 0 0 25px 0;" class="noprint">The permanent URL to this course is:  <a href="{{course_info.shorturl}}">{{course_info.shorturl}}</a></h5>
+    <ul id="hometabs" class="nav nav-tabs noprint" data-tabs="hometabs">
+        <li class="active"><a href="#home" data-toggle="tab">Course Home</a></li>
+        <li><a href="#reserves" data-toggle="tab">Add Reserve Items</a></li>
+        <li><a href="#help" data-toggle="tab">Need Help?</a></li>
+    </ul>
+    <div id="my-tab-content" class="tab-content">
+        <div class="tab-pane active" id="home">
+            {% include 'course-home.twig.html' with {'subscription': subscription, 'readings': readings} %}
+        </div>
+        <div class="tab-pane" id="reserves">
+            {% include 'add-reserves.twig.html' with {'course_info': course_info, 'types': types, 'previouscourses':previouscourses, 'branch': branch_help_info} %}
+        </div>
+        <div class="tab-pane" id="help">
+            {% include 'help.twig.html' with {'help': tut_help, 'vids': vid_help, 'branch': branch_help_info } %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,244 @@
+<script>
+    var puid = '{{puid}}';
+    var course_id = '{{course_id}}';
+    var querySDate = '{{ course_info.startdate }}';
+    var queryEDate = '{{ course_info.enddate }}';
+    var env_url = '{{env_url}}';
+    var docstore = '{{ docstore }}';
+
+</script>
+<script src="{{ env_url }}/js/addreserves/addreserves.js"></script>
+
+<h4>Place Items on Reserve for {{ course_info.title }}</h4>
+
+<div class="row-fluid">
+	<div class="alert alert-info">
+		Requests for Library items may take up to <strong>14 days</strong> to
+		process depending on the time of year/branch
+	</div>
+</div>
+
+<div class="row-fluid">
+	<div class="span6 library-content-add-span">
+		<h4>Library Content</h4>
+		<button class="btn btn-nostyle" id="article-submit">
+			<i class="fa fa-file-text-o fa-3x"></i><span>Article</span>
+		</button>
+		<button class="btn btn-nostyle" id="book-submit">
+			<i class="fa fa-book fa-3x"></i><span>Book</span>
+		</button>
+		<button class="btn btn-nostyle" id="chapter-submit">
+			<i class="fa fa-bookmark-o fa-3x"></i><span>Chapter/Excerpt</span>
+		</button>
+		<button class="btn btn-nostyle" id="stream-submit">
+			<i class="fa fa-film fa-3x"></i><span>DVD/CD &amp;<br>Streaming
+				Media
+			</span>
+		</button>
+		<button class="btn btn-nostyle" id="request-submit">
+			<i class="fa fa-shopping-cart fa-3x"></i><span>Request Purchase</span>
+		</button>
+	</div>
+	<div class="span6 other-content-add-span">
+		<h4>Instructor-Supplied Content</h4>
+		<button class="btn btn-nostyle" id="web-submit">
+			<i class="fa fa-globe fa-3x"></i><span>Web Resources<br>(e.g.
+				blogs, news, YouTube)
+			</span>
+		</button>
+		<button class="btn btn-nostyle" id="pdf-submit">
+			<i class="fa fa-cloud-upload fa-3x"></i><span>PDF Upload</span>
+		</button>
+		<button class="btn btn-nostyle" id="physical-submit">
+			<i class="fa fa-archive fa-3x"></i><span>Physical Item</span>
+		</button>
+	</div>
+	<!--<div class="span2 other-content-add-span">-->
+		<!--<h4>New Content</h4>-->
+		<!---->
+	<!--</div>-->
+</div>
+
+<div class="row-fluid">
+	<form target="_blank" name="search" method="GET"
+		action="http://ubc.summon.serialssolutions.com/search"
+		style="margin: 20px 0 0 0;">
+		<input type="hidden"
+			value="addFacetValueFilters(ContentType,Newspaper Article:t)"
+			name="s.cmd"> <input type="hidden" name="spellcheck"
+			value="true">
+
+		<div class="control-group input-append">
+			<label for="search_field_everything"
+				style="float: left; clear: left; margin-right: 10px;"><h4
+					style="display: inline;">Search the Library's Collections</h4></label>
+
+			<div class="controls" style="float: left; margin: 0 10px;">
+				<input type="search" id="search_field_everything" name="s.q"
+					title="Search Summon for articles, journals, books, theses, images..."
+					value="" class="searchbox">
+				<button type="submit" class="btn btn-inverse add-on"
+					style="height: 30px">Search</button>
+			</div>
+			<a type="button" target="_blank"
+				href="http://ubc.summon.serialssolutions.com/advanced"
+				class="btn btn-inverse add-on" title="Open Advanced Search"
+				style="float: left;">Advanced Search</a>
+		</div>
+	</form>
+</div>
+
+<div class="row">
+	<div class="span12">
+		<h4 class="noprint">Previous Courses</h4>
+		If you would like to import items from a current or recently completed
+		course which does not appear in your list of previously taught courses
+		below, please contact your <a href="mailto:{{ branch.email }}">course
+			reserves branch</a> for assistance. {% if previouscourses %}
+		<div class="clearfix noprint"></div>
+		<table id="all-instructor-readings"
+			class="table table-border table-data">
+			<thead>
+				<tr>
+					<th>CourseID</th>
+					<th>Title</th>
+					<th>&nbsp;</th>
+					<th>Number of Items</th>
+					<th>Copy</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for course in previouscourses %}
+				<tr id="{{ course.course_id }}">
+					<td>{{ course.course_id }}</td>
+					<td>{{ course.title }}<br>
+
+						<div id="{{ course.course_id }}_list" style="display: none;">
+							<strong>By default, all items below will be copied. You
+								can however select only the items you want to copy, using the
+								checkboxes below:</strong> <br> {% for ikey, item in course.list %}
+							<div style="line-height: 28px;">
+								<input type="checkbox"
+									class="{{ course.course_id }}_{{ course_id }}_copy_checkbox"
+									value="{{ ikey }}" style="vertical-align: text-bottom;" />&nbsp;&nbsp;{{
+								item }}
+							</div>
+							{% endfor %}
+						</div>
+					</td>
+					<td>{% if course.list|length > 0 %}
+						<button class="btn btn-inverse" onclick="$('#{{ course.course_id }}_list').toggle('slideDown');">Toggle Item List</button>
+                        {% endif %}
+					</td>
+					<td>{{ course.item_count }}</td>
+					<td>{% if course.list|length > 0 %}
+						<button class="btn btn-inverse" onclick="cloneCourse({{ course.course_id }},{{ course_id }})">Copy Items</button>
+                        {% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<p>No previous courses.</p>
+		{% endif %}
+	</div>
+</div>
+
+<div id="clone-item" class="dialogHidden">
+    <div class="row-fluid">
+        <div class="span12">
+            <h3 style="text-transform: capitalize; margin: 8px 0 8px 0; font-weight: 300;">Cloning Items</h3>
+        </div>
+    </div>
+    <div id="clone-prog">
+        <!-- progress bar -->
+        <p id="clone-prog-items"></p>
+        <div class="progress progress-striped active">
+            <div class="bar" id="clone-prog-bar"></div>
+        </div>
+    </div>
+</div>
+
+<div id="find-item" class="dialogHidden" title="Find Reserves Item">
+	<div id="find-form"></div>
+	<button class="btn" id="find-item-submit-btn">Go</button>
+</div>
+
+<div id="search-results" class="dialogHidden" title="Multiple Results Found. Please choose:">
+	<a href="http://ubc.summon.serialssolutions.com/" target="_blank">Search
+		all of Summon</a> &nbsp;&nbsp;&nbsp;&nbsp; <a class="manual-entry"
+		id="results-manual-entry" href="#" data-formtype="none">Manual
+		form entry</a>
+
+	<div id="results-form"></div>
+</div>
+
+<div id="submit-item" class="dialogHidden" title="Submit Item">
+	<div id="submit-form"></div>
+	<div id="submit-prog">
+		<!-- staus -->
+		<p>
+			<img src="{{ env_url }}/images/waiting.gif" width="48" height="48" />
+		</p>
+		<!-- progress bar -->
+		<div class="progress progress-striped active">
+			<div class="bar" style="width: 0;" id="submit-prog-bar"></div>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+		<div class="span10">
+			<button class="btn" id="submit-item-submit-btn" style="">Submit
+				Item</button>
+			<span id="submit-item-success"></span>
+		</div>
+		<div class="span2">
+			<button class="btn btn-inverse"
+				onclick="$('#submit-item').dialog('close');"
+				style="float: right;">Cancel</button>
+		</div>
+	</div>
+</div>
+
+<div id="submit-results" class="dialogHidden">
+	<h4>Request</h4>
+	<br> <span id="submit-results-success"></span><br> <br>
+	<button class="btn" id="submit-results-submit-btn">Okay</button>
+</div>
+
+<div id="no-item" style="display:none" title="No results found">
+	<p>
+		<button class="btn btn-info" id="no-results-restart">Restart
+			Your Search</button>
+		<br>or<br>
+		<button class="btn btn-info" id="no-results-manual-entry">Enter
+			your request manually here</button>
+	</p>
+</div>
+
+<div id="docstore-pre" class="dialogHidden" title="PDF Upload">
+	<p>
+		<b>Note: </b>This system is for published works, such as book chapters
+		or articles. Please <b style="text-decoration: underline">do not</b>
+		upload items such as PowerPoint slides [.ppt(x)] or images.<br>
+		What type of document would you like to upload?
+	</p>
+
+	<div class="row-fluid">
+		<div class="span12">
+			<button class="btn btn-info span3"
+				onclick="showSubmitForm({}, 'pdf_chapter__docstore', 1);">Book
+				Chapter</button>
+			<button class="btn btn-info span3"
+				onclick="showSubmitForm({}, 'pdf_article__docstore', 1);">Article
+			</button>
+			<button class="btn btn-info span3" id="submit___pdf_other__docstore" >Other/Unsure</button>
+		</div>
+	</div>
+	<br>
+	<button class="btn" id="docstore-pre-cancel-btn">Cancel</button>
+</div>
+
+<script src="{{ env_url }}/staticfile/view/instructorhome/res/add-reserves.js"></script>
+
