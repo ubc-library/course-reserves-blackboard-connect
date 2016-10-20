@@ -17,7 +17,7 @@ var pane = globalNavPageContentArea.getElementsByClassName("contentPaneWide clea
 
 /*
 
- # use this to clear the Blackboard area of all the modules crap
+ # use this to clear the Blackboard area of all the modules
  pane.style.marginLeft = '0px';
  pane.style.marginRight = '0px';
  pane.style.padding = '0';
